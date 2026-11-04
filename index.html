@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jurnal & Jadwal Olahraga</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- Header & Navigation -->
+    <header class="bg-slate-800/80 backdrop-blur-md border-b border-slate-700/60 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-brand-500/20 p-2.5 rounded-xl border border-brand-500/30">
+                    <i class="fa-solid font-bold fa-dumbbell text-brand-500 text-xl sm:text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+                        FitTracker
+                    </h1>
+                    <p class="text-xs text-slate-400">Jurnal & Jadwal Olahraga Harian</p>
+                </div>
+            </div>
+
+            <!-- Tanggal Hari Ini -->
+            <div class="hidden md:flex items-center space-x-2 bg-slate-900/60 px-4 py-2 rounded-lg border border-slate-700/50">
+                <i class="fa-regular fa-calendar text-brand-500"></i>
+                <span id="currentDateText" class="text-sm font-medium text-slate-300"></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        
+        <!-- Dashboard Summary Stats -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Stat 1: Total Sesi -->
+            <div class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-5 hover:border-brand-500/40 transition duration-300 shadow-lg">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Latihan Minggu Ini</p>
+                        <h3 id="statTotalWorkouts" class="text-2xl sm:text-3xl font-extrabold text-white mt-1">0</h3>
+                    </div>
+                    <div class="p-3 bg-blue-500/10 text-blue-400 rounded-xl">
+                        <i class="fa-solid fa-person-running text-lg"></i>
+                    </div>
+                </div>
+                <div class="mt-3 text-xs text-slate-400 flex items-center gap-1">
+                    <span class="text-brand-500 font-semibold flex items-center"><i class="fa-solid fa-[#22c55e] text-[10px] mr-1"></i>Selesai</span> minggu ini
+                </div>
+            </div>
+
+            <!-- Stat 2: To-Do Selesai -->
+            <div class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-5 hover:border-brand-500/40 transition duration-300 shadow-lg">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Progres To-Do Hari Ini</p>
+                        <h3 id="statTodoProgress" class="text-2xl sm:text-3xl font-extrabold text-white mt-1">0%</h3>
+                    </div>
+                    <div class="p-3 bg-brand-500/10 text-brand-400 rounded-xl">
+                        <i class="fa-solid fa-list-check text-lg"></i>
+                    </div>
+                </div>
+                <!-- Progress Bar -->
+                <div class="w-full bg-slate-700/50 rounded-full h-2 mt-4 overflow-hidden">
+                    <div id="todoProgressBar" class="bg-brand-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Stat 3: Total Durasi -->
+            <div class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-5 hover:border-brand-500/40 transition duration-300 shadow-lg">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Durasi Latihan</p>
+                        <h3 id="statTotalDuration" class="text-2xl sm:text-3xl font-extrabold text-white mt-1">0 Menit</h3>
+                    </div>
+                    <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl">
+                        <i class="fa-regular fa-clock text-lg"></i>
+                    </div>
+                </div>
+                <div class="mt-3 text-xs text-slate-400">
+                    Akumulasi durasi minggu ini
+                </div>
+            </div>
+
+            <!-- Stat 4: Estimasi Kalori -->
+            <div class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-5 hover:border-brand-500/40 transition duration-300 shadow-lg">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Estimasi Kalori Terbakar</p>
+                        <h3 id="statTotalCalories" class="text-2xl sm:text-3xl font-extrabold text-white mt-1">0 kcal</h3>
+                    </div>
+                    <div class="p-3 bg-rose-500/10 text-rose-400 rounded-xl">
+                        <i class="fa-solid fa-fire text-lg"></i>
+                    </div>
+                </div>
+                <div class="mt-3 text-xs text-slate-400">
+                    Berdasarkan aktivitas yang dicatat
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Layout: Grid Split -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Left Column: Jadwal Olahraga Mingguan (8 cols) -->
+            <div class="lg:col-span-7 space-y-6">
+                <div class="bg-slate-800/40 border border-slate-700/60 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                        <div>
+                            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                                <i class="fa-regular fa-calendar-alt text-brand-500"></i> Jadwal Olahraga Mingguan
+                            </h2>
+                            <p class="text-xs text-slate-400 mt-1">Atur dan rencanakan aktivitas fisikmu per hari</p>
+                        </div>
+                        <button onclick="openScheduleModal()" class="w-full sm:w-auto px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl font-medium text-sm transition duration-200 flex items-center justify-center gap-2 shadow-lg shadow-brand-600/20">
+                            <i class="fa-solid fa-plus text-xs"></i> Tambah Jadwal
+                        </button>
+                    </div>
+
+                    <!-- Days Filter Tabs -->
+                    <div class="flex gap-2 overflow-x-auto pb-3 mb-6 scrollbar-none border-b border-slate-700/50" id="dayTabs">
+                        <button onclick="filterDay('Semua')" class="day-tab px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition bg-brand-500 text-white" data-day="Semua">Semua Hari</button>
+                        <button onclick="filterDay('Senin')" class="day-tab px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition bg-slate-700/50 text-slate-300 hover:bg-slate-700" data-day="Senin">Senin</button>
+                        <button onclick="filterDay('Selasa')" class="day-tab px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition bg-slate-700/50 text-slate-300 hover:bg-slate-700" data-day="Selasa">Selasa</button>
+                        <button onclick="filterDay('Rabu')" class="day-tab px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition bg-slate-700/50 text-slate-300 hover:bg-slate-700" data-day="Rabu">Rabu</button>
+                        <button onclick="filterDay('Kamis')" class="day-tab px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition bg-slate-700/50 text-slate-300 hover:bg-slate-700" data-day="Kamis">Kamis</button>
+                        <button onclick="filterDay('Jumat')" class="day-tab px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition bg-slate-700/50 text-slate-300 hover:bg-slate-700" data-day="Jumat">Jumat</button>
+                        <button onclick="filterDay('Sabtu')" class="day-tab px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition bg-slate-700/50 text-slate-300 hover:bg-slate-700" data-day="Sabtu">Sabtu</button>
+                        <button onclick="filterDay('Minggu')" class="day-tab px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition bg-slate-700/50 text-slate-300 hover:bg-slate-700" data-day="Minggu">Minggu</button>
+                    </div>
+
+                    <!-- Schedule Container -->
+                    <div id="scheduleContainer" class="space-y-3">
+                        <!-- Content rendered via JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: To-Do List Harian & Catatan (5 cols) -->
+            <div class="lg:col-span-5 space-y-6">
+                <!-- To-Do List Section -->
+                <div class="bg-slate-800/40 border border-slate-700/60 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-list-check text-brand-500"></i> Target & To-Do Harian
+                            </h2>
+                            <p class="text-xs text-slate-400 mt-1">Tugas kecil penunjang latihan (nutrisi, air, dll)</p>
+                        </div>
+                    </div>
+
+                    <!-- Input Form for To-Do -->
+                    <form id="todoForm" onsubmit="addTodo(event)" class="flex gap-2 mb-4">
+                        <input type="text" id="todoInput" placeholder="Contoh: Minum Air 2L, Stretch pagi..." required
+                            class="flex-1 bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500 transition">
+                        <button type="submit" class="px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </form>
+
+                    <!-- To-Do List Container -->
+                    <div id="todoContainer" class="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
+                        <!-- Items populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Evaluasi & Refleksi Singkat -->
+                <div class="bg-slate-800/40 border border-slate-700/60 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
+                    <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                        <i class="fa-regular fa-note-sticky text-amber-400"></i> Catatan Evaluasi
+                    </h3>
+                    <p class="text-xs text-slate-400 mb-3">Tuliskan kendala, kondisi tubuh, atau progres hari ini.</p>
+                    <textarea id="notesArea" rows="4" placeholder="Contoh: Hari ini leg day terasa berat di kuadrisep. Usahakan tidur 8 jam..."
+                        class="w-full bg-slate-900/80 border border-slate-700 rounded-xl p-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500 transition resize-none"></textarea>
+                    <button onclick="saveNotes()" class="mt-3 w-full py-2 bg-slate-700 hover:bg-slate-600 text-xs font-semibold text-slate-200 rounded-xl transition">
+                        Simpan Catatan
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Form untuk Tambah Jadwal Olahraga -->
+    <div id="scheduleModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl transform transition-all">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-dumbbell text-brand-500"></i> Tambah Aktivitas Olahraga
+                </h3>
+                <button onclick="closeScheduleModal()" class="text-slate-400 hover:text-white text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="scheduleForm" onsubmit="saveSchedule(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Nama Olahraga / Sesi</label>
+                    <input type="text" id="modalTitle" required placeholder="Misal: Lari Pagi / Chest & Triceps"
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Hari</label>
+                        <select id="modalDay" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-500">
+                            <option value="Senin">Senin</option>
+                            <option value="Selasa">Selasa</option>
+                            <option value="Rabu">Rabu</option>
+                            <option value="Kamis">Kamis</option>
+                            <option value="Jumat">Jumat</option>
+                            <option value="Sabtu">Sabtu</option>
+                            <option value="Minggu">Minggu</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Waktu</label>
+                        <input type="time" id="modalTime" required
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Durasi (Menit)</label>
+                        <input type="number" id="modalDuration" min="5" value="45" required
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Estimasi Kalori (kcal)</label>
+                        <input type="number" id="modalCalories" min="0" value="250" required
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Kategori Aktivitas</label>
+                    <select id="modalCategory" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-slate-100 focus:outline-none focus:border-brand-500">
+                        <option value="Kardio">Kardio (Lari, Sepeda, Renang)</option>
+                        <option value="Beban">Latihan Beban / Gym</option>
+                        <option value="Kalistenik">Kalistenik / Bodyweight</option>
+                        <option value="Fleksibilitas">Yoga / Stretching</option>
+                        <option value="Olahraga Tim">Olahraga Tim (Futsal, Basket)</option>
+                    </select>
+                </div>
+
+                <div class="pt-3 flex gap-2">
+                    <button type="button" onclick="closeScheduleModal()" class="flex-1 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm font-medium rounded-xl transition">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex-1 py-2.5 bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold rounded-xl transition">
+                        Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-brand-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-3 translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <i class="fa-solid fa-circle-check text-lg"></i>
+        <span id="toastMsg" class="text-sm font-medium">Pesan notifikasi</span>
+    </div>
+
+    <!-- Application Script Logic -->
+    <script>
+        // Default State & Data Initializer
+        const defaultSchedules = [
+            { id: 1, day: 'Senin', title: 'Lari Pagi / Cardio', time: '06:00', duration: 30, calories: 220, category: 'Kardio', completed: true },
+            { id: 2, day: 'Rabu', title: 'Gym - Upper Body Workout', time: '16:30', duration: 60, calories: 400, category: 'Beban', completed: false },
+            { id: 3, day: 'Jumat', title: 'Yoga & Body Stretching', time: '19:00', duration: 45, calories: 150, category: 'Fleksibilitas', completed: false },
+            { id: 4, day: 'Sabtu', title: 'Futsal Bersama Tim', time: '15:30', duration: 90, calories: 600, category: 'Olahraga Tim', completed: false }
+        ];
+
+        const defaultTodos = [
+            { id: 1, text: 'Minum air putih 2.5 Liter', completed: true },
+            { id: 2, text: 'Konsumsi Protein Shake pasca latihan', completed: false },
+            { id: 3, text: 'Tidur sebelum jam 23:00 untuk recovery', completed: false }
+        ];
+
+        // Global Variables State
+        let schedules = JSON.parse(localStorage.getItem('fit_schedules')) || defaultSchedules;
+        let todos = JSON.parse(localStorage.getItem('fit_todos')) || defaultTodos;
+        let activeFilterDay = 'Semua';
+
+        // Format Date Indonesian
+        function initDateDisplay() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const today = new Date().toLocaleDateString('id-ID', options);
+            document.getElementById('currentDateText').innerText = today;
+        }
+
+        // Save State to Local Storage
+        function saveData() {
+            localStorage.setItem('fit_schedules', JSON.stringify(schedules));
+            localStorage.setItem('fit_todos', JSON.stringify(todos));
+            updateDashboard();
+        }
+
+        // Display Toast Notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            toastMsg.innerText = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // Render Schedules List
+        function renderSchedules() {
+            const container = document.getElementById('scheduleContainer');
+            container.innerHTML = '';
+
+            const filtered = activeFilterDay === 'Semua' 
+                ? schedules 
+                : schedules.filter(item => item.day === activeFilterDay);
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10 border border-dashed border-slate-700/60 rounded-xl">
+                        <i class="fa-solid fa-calendar-xmark text-slate-600 text-3xl mb-2"></i>
+                        <p class="text-sm text-slate-400">Tidak ada jadwal olahraga untuk hari ini.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(item => {
+                let catBadgeColor = 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+                if(item.category === 'Beban') catBadgeColor = 'bg-purple-500/10 text-purple-400 border-purple-500/20';
+                if(item.category === 'Fleksibilitas') catBadgeColor = 'bg-teal-500/10 text-teal-400 border-teal-500/20';
+                if(item.category === 'Olahraga Tim') catBadgeColor = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-xl border transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                    item.completed 
+                        ? 'bg-slate-900/40 border-slate-800 opacity-75' 
+                        : 'bg-slate-800/80 border-slate-700/70 hover:border-slate-600'
+                }`;
+
+                card.innerHTML = `
+                    <div class="flex items-start sm:items-center space-x-3.5">
+                        <button onclick="toggleScheduleStatus(${item.id})" class="mt-1 sm:mt-0 text-xl transition text-slate-500 hover:text-brand-500">
+                            <i class="${item.completed ? 'fa-solid fa-circle-check text-brand-500' : 'fa-regular fa-circle'}"></i>
+                        </button>
+                        <div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="font-bold text-slate-100 ${item.completed ? 'line-through text-slate-400' : ''}">${item.title}</span>
+                                <span class="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-md border ${catBadgeColor}">${item.category}</span>
+                            </div>
+                            <div class="flex items-center space-x-3 text-xs text-slate-400 mt-1.5">
+                                <span class="flex items-center gap-1"><i class="fa-regular fa-calendar text-slate-500"></i> ${item.day}</span>
+                                <span class="flex items-center gap-1"><i class="fa-regular fa-clock text-slate-500"></i> ${item.time}</span>
+                                <span class="flex items-center gap-1"><i class="fa-solid fa-stopwatch text-slate-500"></i> ${item.duration} mnt</span>
+                                <span class="flex items-center gap-1"><i class="fa-solid fa-fire text-slate-500"></i> ${item.calories} kcal</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-end space-x-2 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-700/40">
+                        <button onclick="deleteSchedule(${item.id})" class="p-2 text-slate-500 hover:text-rose-400 transition text-sm">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Render To-Do Items List
+        function renderTodos() {
+            const container = document.getElementById('todoContainer');
+            container.innerHTML = '';
+
+            if (todos.length === 0) {
+                container.innerHTML = `
+                    <p class="text-xs text-slate-500 text-center py-4">Belum ada target harian. Tambahkan target baru di atas.</p>
+                `;
+                return;
+            }
+
+            todos.forEach(todo => {
+                const item = document.createElement('div');
+                item.className = `flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-slate-800 transition ${
+                    todo.completed ? 'opacity-60' : ''
+                }`;
+
+                item.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" ${todo.completed ? 'checked' : ''} onchange="toggleTodoStatus(${todo.id})"
+                            class="w-4 h-4 rounded text-brand-500 focus:ring-brand-500 accent-brand-500 bg-slate-800 border-slate-700 cursor-pointer">
+                        <span class="text-sm text-slate-200 ${todo.completed ? 'line-through text-slate-500' : ''}">${escapeHtml(todo.text)}</span>
+                    </div>
+                    <button onclick="deleteTodo(${todo.id})" class="text-slate-500 hover:text-rose-400 text-xs p-1">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // Update Dashboard Summary Stats
+        function updateDashboard() {
+            // Selesai / Total Workouts
+            const completedWorkouts = schedules.filter(s => s.completed);
+            document.getElementById('statTotalWorkouts').innerText = `${completedWorkouts.length} / ${schedules.length}`;
+
+            // Durasi & Kalori Total dari yang Selesai
+            const totalDuration = completedWorkouts.reduce((acc, curr) => acc + Number(curr.duration), 0);
+            const totalCalories = completedWorkouts.reduce((acc, curr) => acc + Number(curr.calories), 0);
+
+            document.getElementById('statTotalDuration').innerText = `${totalDuration} Mnt`;
+            document.getElementById('statTotalCalories').innerText = `${totalCalories} kcal`;
+
+            // Progres To-Do %
+            const completedTodos = todos.filter(t => t.completed).length;
+            const progressPercent = todos.length > 0 ? Math.round((completedTodos / todos.length) * 100) : 0;
+
+            document.getElementById('statTodoProgress').innerText = `${progressPercent}%`;
+            document.getElementById('todoProgressBar').style.width = `${progressPercent}%`;
+        }
+
+        // Add Schedule Logic
+        function saveSchedule(e) {
+            e.preventDefault();
+            const newSchedule = {
+                id: Date.now(),
+                title: document.getElementById('modalTitle').value,
+                day: document.getElementById('modalDay').value,
+                time: document.getElementById('modalTime').value,
+                duration: Number(document.getElementById('modalDuration').value),
+                calories: Number(document.getElementById('modalCalories').value),
+                category: document.getElementById('modalCategory').value,
+                completed: false
+            };
+
+            schedules.push(newSchedule);
+            saveData();
+            renderSchedules();
+            closeScheduleModal();
+            showToast("Jadwal olahraga berhasil ditambahkan!");
+            document.getElementById('scheduleForm').reset();
+        }
+
+        // Toggle Status Schedule
+        function toggleScheduleStatus(id) {
+            schedules = schedules.map(item => item.id === id ? { ...item, completed: !item.completed } : item);
+            saveData();
+            renderSchedules();
+        }
+
+        // Delete Schedule
+        function deleteSchedule(id) {
+            schedules = schedules.filter(item => item.id !== id);
+            saveData();
+            renderSchedules();
+            showToast("Jadwal telah dihapus");
+        }
+
+        // Filter Day Logic
+        function filterDay(day) {
+            activeFilterDay = day;
+            document.querySelectorAll('.day-tab').forEach(btn => {
+                if (btn.getAttribute('data-day') === day) {
+                    btn.className = 'day-tab px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition bg-brand-500 text-white shadow-md';
+                } else {
+                    btn.className = 'day-tab px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition bg-slate-700/50 text-slate-300 hover:bg-slate-700';
+                }
+            });
+            renderSchedules();
+        }
+
+        // To-Do Handlers
+        function addTodo(e) {
+            e.preventDefault();
+            const input = document.getElementById('todoInput');
+            if (!input.value.trim()) return;
+
+            todos.push({
+                id: Date.now(),
+                text: input.value.trim(),
+                completed: false
+            });
+
+            input.value = '';
+            saveData();
+            renderTodos();
+            showToast("Target harian ditambahkan!");
+        }
+
+        function toggleTodoStatus(id) {
+            todos = todos.map(todo => todo.id === id ? { ...todo, completed: !todo.completed } : todo);
+            saveData();
+            renderTodos();
+        }
+
+        function deleteTodo(id) {
+            todos = todos.filter(todo => todo.id !== id);
+            saveData();
+            renderTodos();
+        }
+
+        // Notes Local Storage Handler
+        function saveNotes() {
+            const noteText = document.getElementById('notesArea').value;
+            localStorage.setItem('fit_notes', noteText);
+            showToast("Catatan evaluasi tersimpan");
+        }
+
+        function loadNotes() {
+            const savedNotes = localStorage.getItem('fit_notes');
+            if (savedNotes) {
+                document.getElementById('notesArea').value = savedNotes;
+            }
+        }
+
+        // Modal Handlers
+        function openScheduleModal() {
+            document.getElementById('scheduleModal').classList.remove('hidden');
+            document.getElementById('scheduleModal').classList.add('flex');
+        }
+
+        function closeScheduleModal() {
+            document.getElementById('scheduleModal').classList.add('hidden');
+            document.getElementById('scheduleModal').classList.remove('flex');
+        }
+
+        // Helper to Escape HTML String
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        // Initialize App
+        window.onload = function() {
+            initDateDisplay();
+            renderSchedules();
+            renderTodos();
+            updateDashboard();
+            loadNotes();
+        }
+    </script>
+</body>
+</html>
